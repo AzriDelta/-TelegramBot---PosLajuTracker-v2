@@ -1,6 +1,6 @@
 import telegram
 from dbhelper import DBHelper
-from telegram.ext import Updater, CommandHandler, Filters, MessageHandler
+from telegram.ext import CommandHandler, ConversationHandler, Updater, Filters, MessageHandler
 from telegram import ForceReply
 import logging
 
@@ -8,7 +8,6 @@ import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 
 #for logging error error
@@ -28,9 +27,10 @@ def start(bot, update):
 #receive a message when the command /add is issued
 def add(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text="Send me a tracking number")
-    #for user reply
-    tracking_number = update.message.text #get user reply
+    update = ConversationHandler.handle_update(update)
+    tracking_number = update.message.text
     bot.send_message(chat_id=update.message.chat_id, text=tracking_number)
+    print(tracking_number)
 
 
 #main
@@ -48,7 +48,7 @@ def main():
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler('start', start))
-    dp.add_handler(CommandHandler('add', add))
+    dp.add_handler(ConversationHandler((CommandHandler('add', add)), MessageHandler(Filters.text, add), '/cancel'))
 
     # on noncommand i.e message - put intro
     dp.add_handler(MessageHandler(Filters.text, intro))
